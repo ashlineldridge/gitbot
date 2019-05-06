@@ -1,0 +1,6 @@
+build/
+.idea/
+*.swp
+*.orig
+*.log
+.DS_Store
