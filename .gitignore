@@ -3,4 +3,5 @@ build/
 *.swp
 *.orig
 *.log
+.env
 .DS_Store

@@ -14,7 +14,7 @@ type PushHandler struct {
 }
 
 func (h *PushHandler) Handles() []string {
-  return []string{"issue_comment"}
+  return []string{"push"}
 }
 
 func (h *PushHandler) Handle(ctx context.Context, eventType, deliveryID string, payload []byte) error {
@@ -24,6 +24,5 @@ func (h *PushHandler) Handle(ctx context.Context, eventType, deliveryID string, 
   }
 
   log.Printf("Received push event for ref %s on repo %s", *event.Ref, *event.Repo.GitURL)
-
   return nil
 }

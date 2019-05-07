@@ -1,14 +1,30 @@
 package github
 
-import "github.com/palantir/go-githubapp/githubapp"
+import (
+  "fmt"
+  "os"
+  "strconv"
 
-type gitHubApp struct {
-  IntegrationID int
-  WebhookSecret string
-  PrivateKey    string
-}
+  "github.com/palantir/go-githubapp/githubapp"
+  "github.com/pkg/errors"
+)
 
-func LoadConfig() *githubapp.Config {
+func LoadConfig() (*githubapp.Config, error) {
+  appID, err := getIntEnv("GITHUB_APP_ID")
+  if err != nil {
+    return nil, err
+  }
+
+  secret, err := getEnv("GITHUB_APP_WEBHOOK_SECRET")
+  if err != nil {
+    return nil, err
+  }
+
+  privateKey, err := getEnv("GITHUB_APP_PRIVATE_KEY")
+  if err != nil {
+    return nil, err
+  }
+
   return &githubapp.Config{
     WebURL:   "",
     V3APIURL: "",
@@ -18,9 +34,9 @@ func LoadConfig() *githubapp.Config {
       WebhookSecret string `yaml:"webhook_secret" json:"webhookSecret"`
       PrivateKey    string `yaml:"private_key" json:"privateKey"`
     }{
-      IntegrationID: 0,
-      WebhookSecret: "",
-      PrivateKey:    "",
+      IntegrationID: appID,
+      WebhookSecret: secret,
+      PrivateKey:    privateKey,
     },
     OAuth: struct {
       ClientID     string `yaml:"client_id" json:"clientId"`
@@ -29,5 +45,27 @@ func LoadConfig() *githubapp.Config {
       ClientID:     "",
       ClientSecret: "",
     },
+  }, nil
+}
+
+func getEnv(key string) (string, error) {
+  value, ok := os.LookupEnv(key)
+  if !ok {
+    return "", fmt.Errorf("required variable %s is not set", key)
   }
+  return value, nil
+}
+
+func getIntEnv(key string) (int, error) {
+  s, err := getEnv(key)
+  if err != nil {
+    return 0, err
+  }
+
+  i, err := strconv.Atoi(s)
+  if err != nil {
+    return 0, errors.Wrapf(err, "could not convert value of %s to an integer", key)
+  }
+
+  return i, nil
 }
